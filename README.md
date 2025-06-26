@@ -17,22 +17,33 @@ byte buzzer = 6;
 byte voice = A5;
 byte brightness = A0;
 
+// Times
+unsigned long lastTimeBuzzer = 0;
+const int timeOut = 300;
 
-// glbal variables
+
+// global variables
 int brightnessValue;
 int voiceValue;
 int signal;
 byte count;
 
 
-void turnOffLEDs(byte LED1, byte LED2) {
+// Status
+bool buzzerState = false;
+bool autoState = false;
+bool manualState = false;
+
+
+void turnOffLEDs(byte LED1, byte LED2, byte LED3) {
   digitalWrite(LED1, LOW);
   digitalWrite(LED2, LOW);
+  digitalWrite(LED3, LOW);
 }
 
 
-void alert(LED){
-  count = 0
+void alert(byte LED){
+  count = 0;
 
   do{
     digitalWrite(LED, LOW);
@@ -53,36 +64,88 @@ void autoMode() {
   brightnessValue = analogRead(brightness);
   voiceValue = analogRead(voice);
 
-  if (brigtnessValue < 250 && voiceValue > 523){ // Darkness mode
-    turnOffLEDs(redLED, whiteLED);
+  Serial.println("in auto");
+
+  if (brightnessValue < 250 && voiceValue > 530){ // Darkness mode
+    turnOffLEDs(blueLED, whiteLED, greenLED);
+    digitalWrite(redLED, HIGH);
     alert(redLED);
   }
 
-  else if (brightnessValue > 500 && voiceValue < 520) {  // Rest mode
-    turnOffLEDs(blueLED, redLED);
-    digitalWrite(whiteLED, LOW);
+  else if (brightnessValue > 500 && voiceValue < 533) {  // High brightness mode
+    turnOffLEDs(blueLED, redLED, greenLED);
+    digitalWrite(whiteLED, HIGH);
   }
 
-  else if (brightnessValue > 300 && brightnessValue < 500 && voiceValue > 523) {
-    turnOffLEDs(redLED, whiteLED);
+  else if (brightnessValue > 540 && brightnessValue < 580 && voiceValue > 530) {
+    turnOffLEDs(redLED, whiteLED, greenLED);
     alert(blueLED);
   }
 
+  else {
+    turnOffLEDs(redLED, blueLED, whiteLED);
+    digitalWrite(greenLED, HIGH);
+  }
+}
+
+
+void manualMode() {
+
+  Serial.println("IN manual");
+
+  if (signal == 71 && ir.decodedIRData.flags & IRDATA_FLAGS_IS_REPEAT) {
+    digitalWrite(buzzer, HIGH);
+  }
+
+  else{
+    digitalWrite(buzzer, LOW);
+  }
 }
 
 
 
 void setup() {
+  Serial.begin(9600);
   ir.enableIRIn();
   pinMode(redLED, OUTPUT);
   pinMode(blueLED, OUTPUT);
   pinMode(whiteLED, OUTPUT);
+  pinMode(buzzer, OUTPUT);
   pinMode(voice, INPUT);
 }
 
 
 void loop() {
-  signal = ir.decodedIRData.command;
+
+  if (ir.decode()){
+    signal = ir.decodedIRData.command;
+    ir.resume();
+  }
+
+  if (signal == 69 && !(ir.decodedIRData.flags & IRDATA_FLAGS_IS_REPEAT)){
+    autoState = true;
+    manualState = false;    
+  }
+
+  else if (signal == 70 && !(ir.decodedIRData.flags & IRDATA_FLAGS_IS_REPEAT)){
+    autoState = false;
+    manualState = true;    
+  }
+
+  if (manualState){
+    manualMode();
+  }
+
+  if (autoState) {
+    autoMode();
+  }
+
+  Serial.print("bright= ");
+  Serial.println(brightnessValue);
+  Serial.print("voice= ");
+  Serial.println(voiceValue);
+
+  delay(300);
 }
 
 ```
