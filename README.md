@@ -33,7 +33,11 @@ Switching back to Auto Mode re-enables sensor monitoring.
 
 
 # Pictures:
-
+![img1](Arduino_project_smart_sensors_IR_PART1.jpeg)
+![img2](Arduino_project_smart_sensors_IR_PART2.jpeg)
+![img3](Arduino_project_smart_sensors_IR_PART3.jpeg)
+![img4](Arduino_project_smart_sensors_IR_PART4.jpeg)
+![img5](Arduino_project_smart_sensors_IR_PART5.jpeg)
 
 
 
