@@ -32,6 +32,11 @@ In this mode, pressing the designated remote button will manually trigger the bu
 Switching back to Auto Mode re-enables sensor monitoring.
 
 
+# Pictures:
+
+
+
+
 # Code:
 ```cpp
 #include <IRremote.hpp>
