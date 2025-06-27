@@ -29,11 +29,12 @@ int signal;
 byte count;
 
 
+
 // Status
 bool buzzerState = false;
 bool autoState = false;
 bool manualState = false;
-
+bool isRepeat;
 
 void turnOffLEDs(byte LED1, byte LED2, byte LED3) {
   digitalWrite(LED1, LOW);
@@ -72,12 +73,12 @@ void autoMode() {
     alert(redLED);
   }
 
-  else if (brightnessValue > 500 && voiceValue < 533) {  // High brightness mode
+  else if (brightnessValue > 620 && voiceValue < 533) {  // High brightness mode
     turnOffLEDs(blueLED, redLED, greenLED);
     digitalWrite(whiteLED, HIGH);
   }
 
-  else if (brightnessValue > 540 && brightnessValue < 580 && voiceValue > 530) {
+  else if (brightnessValue > 540 && brightnessValue < 600 && voiceValue > 533) {
     turnOffLEDs(redLED, whiteLED, greenLED);
     alert(blueLED);
   }
@@ -93,13 +94,12 @@ void manualMode() {
 
   Serial.println("IN manual");
 
-  if (signal == 71 && ir.decodedIRData.flags & IRDATA_FLAGS_IS_REPEAT) {
-    digitalWrite(buzzer, HIGH);
+  if (signal == 71 && !(ir.decodedIRData.flags & IRDATA_FLAGS_IS_REPEAT)) {
+    buzzerState = !buzzerState;
   }
-
-  else{
-    digitalWrite(buzzer, LOW);
-  }
+  
+  digitalWrite(buzzer, buzzerState);
+  
 }
 
 
@@ -119,6 +119,7 @@ void loop() {
 
   if (ir.decode()){
     signal = ir.decodedIRData.command;
+    
     ir.resume();
   }
 
