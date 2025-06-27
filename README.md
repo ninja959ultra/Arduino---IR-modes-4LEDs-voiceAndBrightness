@@ -90,19 +90,6 @@ void autoMode() {
 }
 
 
-void manualMode() {
-
-  Serial.println("IN manual");
-
-  if (signal == 71 && !(ir.decodedIRData.flags & IRDATA_FLAGS_IS_REPEAT)) {
-    buzzerState = !buzzerState;
-  }
-  
-  digitalWrite(buzzer, buzzerState);
-  
-}
-
-
 
 void setup() {
   Serial.begin(9600);
@@ -119,6 +106,7 @@ void loop() {
 
   if (ir.decode()){
     signal = ir.decodedIRData.command;
+    isRepeat = ir.decodedIRData.flags & IRDATA_FLAGS_IS_REPEAT;
     
     ir.resume();
   }
@@ -130,11 +118,15 @@ void loop() {
 
   else if (signal == 70 && !(ir.decodedIRData.flags & IRDATA_FLAGS_IS_REPEAT)){
     autoState = false;
-    manualState = true;    
+    manualState = true;
   }
 
   if (manualState){
-    manualMode();
+    digitalWrite(buzzer, HIGH);
+  }
+
+  else{
+    digitalWrite(buzzer, LOW);
   }
 
   if (autoState) {
@@ -145,6 +137,8 @@ void loop() {
   Serial.println(brightnessValue);
   Serial.print("voice= ");
   Serial.println(voiceValue);
+  Serial.println("Manual state= ");
+  Serial.println(manualState);
 
   delay(300);
 }
